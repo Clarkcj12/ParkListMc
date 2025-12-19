@@ -102,7 +102,7 @@ const highlights = [
   },
 ];
 
-export default function Home(): JSX.Element {
+export default function Home() {
   return (
     <main className="min-h-screen">
       <section className="relative overflow-hidden border-b border-slate-900">
@@ -241,9 +241,11 @@ export default function Home(): JSX.Element {
               that want to grow.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button type="button">Create a listing</Button>
-              <Button type="button" variant="outline">
-                Owner login
+              <Button asChild type="button">
+                <Link href="/sign-up">Create a listing</Link>
+              </Button>
+              <Button asChild type="button" variant="outline">
+                <Link href="/sign-in">Owner login</Link>
               </Button>
             </div>
           </div>

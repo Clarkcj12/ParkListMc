@@ -1,10 +1,23 @@
+import Link from "next/link";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Shield, Vote } from "lucide-react";
 
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
 
-export default function Dashboard(): JSX.Element {
+export default async function Dashboard(): Promise<JSX.Element> {
+  const session = await auth.api.getSession({
+    headers: headers(),
+  });
+
+  if (!session?.user) {
+    redirect(`/sign-in?callbackUrl=${encodeURIComponent("/dashboard")}`);
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-14 text-slate-100">
       <div className="mx-auto flex max-w-5xl flex-col gap-8">
@@ -14,14 +27,14 @@ export default function Dashboard(): JSX.Element {
             Manage your park listings
           </h1>
           <p className="max-w-3xl text-lg text-slate-300">
-            Sign in to create listings, configure NuVotifier credentials, and
-            review vote activity.
+            Welcome back, {session.user.name}. Your listings, Votifier
+            credentials, and vote reports will live here.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button type="button">Sign in</Button>
-            <Button type="button" variant="outline">
-              Create listing
+            <Button asChild type="button" variant="outline">
+              <Link href="/#directory">View directory</Link>
             </Button>
+            <SignOutButton />
           </div>
         </div>
 
