@@ -12,8 +12,6 @@ import { authClient } from "@/lib/auth-client";
 import { getCallbackUrl } from "@/lib/callback-url";
 import SocialAuthButtons from "@/components/auth/social-auth-buttons";
 
-type Provider = "google" | "discord" | "microsoft";
-
 export default function SignInPage(): JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -136,7 +134,7 @@ export default function SignInPage(): JSX.Element {
                 />
               </div>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && !activeProvider ? "Signing in..." : "Sign in"}
+                {isSubmitting ? "Signing in..." : "Sign in"}
               </Button>
             </form>
           </CardContent>
