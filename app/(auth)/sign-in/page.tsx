@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { getCallbackUrl } from "@/lib/callback-url";
 
+type Provider = "google" | "discord" | "microsoft";
+
 export default function SignInPage(): JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,7 +23,7 @@ export default function SignInPage(): JSX.Element {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeProvider, setActiveProvider] = useState<string | null>(null);
+  const [activeProvider, setActiveProvider] = useState<Provider | null>(null);
 
   useEffect(() => {
     if (session?.user) {
@@ -34,36 +36,50 @@ export default function SignInPage(): JSX.Element {
     setError(null);
     setIsSubmitting(true);
 
-    const { data, error: signInError } = await authClient.signIn.email({
-      email,
-      password,
-      callbackURL: callbackUrl,
-    });
+    try {
+      const { data, error: signInError } = await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: callbackUrl,
+      });
 
-    if (signInError) {
-      setError(signInError.message || "Unable to sign in.");
+      if (signInError) {
+        setError(signInError.message || "Unable to sign in.");
+        return;
+      }
+
+      if (!data?.redirect) {
+        router.push(callbackUrl);
+      }
+    } catch (err) {
+      // Network/transport error
+      // eslint-disable-next-line no-console
+      console.error("Sign in failed:", err);
+      setError("Unable to sign in.");
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    if (!data?.redirect) {
-      router.push(callbackUrl);
-    }
-    setIsSubmitting(false);
   };
 
-  const handleSocialSignIn = async (provider: "google" | "discord" | "microsoft") => {
+  const handleSocialSignIn = async (provider: Provider) => {
     setError(null);
     setActiveProvider(provider);
     setIsSubmitting(true);
 
-    const { error: signInError } = await authClient.signIn.social({
-      provider,
-      callbackURL: callbackUrl,
-    });
+    try {
+      const { error: signInError } = await authClient.signIn.social({
+        provider,
+        callbackURL: callbackUrl,
+      });
 
-    if (signInError) {
-      setError(signInError.message || "Unable to sign in.");
+      if (signInError) {
+        setError(signInError.message || "Unable to sign in.");
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Social sign-in failed:", err);
+      setError("Unable to sign in.");
+    } finally {
       setIsSubmitting(false);
       setActiveProvider(null);
     }

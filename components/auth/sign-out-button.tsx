@@ -6,9 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
-import React from "react";
-
-export function SignOutButton(): React.ReactElement {
+export function SignOutButton(): JSX.Element {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
 

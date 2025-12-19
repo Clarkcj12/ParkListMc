@@ -1,3 +1,5 @@
+import type { ReadonlyURLSearchParams } from "next/navigation";
+
 export type SearchParamsLike = ReadonlyURLSearchParams | URLSearchParams;
 
 export function getCallbackUrl(searchParams: SearchParamsLike): string {
