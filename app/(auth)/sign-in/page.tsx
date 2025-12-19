@@ -10,6 +10,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { getCallbackUrl } from "@/lib/callback-url";
+import SocialAuthButtons from "@/components/auth/social-auth-buttons";
 
 type Provider = "google" | "discord" | "microsoft";
 
@@ -23,7 +24,6 @@ export default function SignInPage(): JSX.Element {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeProvider, setActiveProvider] = useState<Provider | null>(null);
 
   useEffect(() => {
     if (session?.user) {
@@ -144,32 +144,13 @@ export default function SignInPage(): JSX.Element {
             <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
               Or continue with
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={isSubmitting}
-                onClick={() => handleSocialSignIn("google")}
-              >
-                {activeProvider === "google" ? "Connecting..." : "Google"}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={isSubmitting}
-                onClick={() => handleSocialSignIn("microsoft")}
-              >
-                {activeProvider === "microsoft" ? "Connecting..." : "Microsoft"}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={isSubmitting}
-                onClick={() => handleSocialSignIn("discord")}
-              >
-                {activeProvider === "discord" ? "Connecting..." : "Discord"}
-              </Button>
-            </div>
+            <SocialAuthButtons
+              callbackUrl={callbackUrl}
+              disabled={isSubmitting}
+              onStart={() => setIsSubmitting(true)}
+              onFinish={() => setIsSubmitting(false)}
+              onError={(msg) => setError(msg)}
+            />
           </CardFooter>
         </Card>
 
