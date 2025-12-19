@@ -10,6 +10,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { getCallbackUrl } from "@/lib/callback-url";
+import { redirectIsTrue } from "@/lib/auth-utils";
 import SocialAuthButtons from "@/components/auth/social-auth-buttons";
 
 export default function SignInPage(): JSX.Element {
@@ -46,7 +47,7 @@ export default function SignInPage(): JSX.Element {
         return;
       }
 
-      if (!data?.redirect) {
+      if (!redirectIsTrue(data)) {
         router.push(callbackUrl);
       }
     } catch (err) {
