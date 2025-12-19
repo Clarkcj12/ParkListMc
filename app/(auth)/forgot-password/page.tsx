@@ -11,11 +11,17 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { getCallbackUrl } from "@/lib/callback-url";
 
-function getResetRedirect(): string {
-  if (typeof window !== "undefined" && window.location) {
-    return `${window.location.origin}/reset-password`;
-  }
-  return "/reset-password";
+function getResetRedirect(searchParams: ReadonlyURLSearchParams | null): string {
+  const base =
+    typeof window !== "undefined" && window.location
+      ? `${window.location.origin}/reset-password`
+      : "/reset-password";
+
+  const callback = searchParams ? getCallbackUrl(searchParams) : null;
+  if (!callback) return base;
+
+  const params = new URLSearchParams({ callbackUrl: callback });
+  return `${base}?${params.toString()}`;
 }
 
 export default function ForgotPasswordPage(): JSX.Element {
@@ -36,7 +42,7 @@ export default function ForgotPasswordPage(): JSX.Element {
       const { error: requestError } =
         await authClient.requestPasswordReset({
           email,
-          redirectTo: getResetRedirect(),
+          redirectTo: getResetRedirect(searchParams),
         });
 
       if (requestError) {

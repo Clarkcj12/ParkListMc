@@ -19,6 +19,8 @@ export default function ResetPasswordPage(): JSX.Element {
   const token = searchParams.get("token");
   const errorParam = searchParams.get("error");
 
+  const isInvalid = !token || Boolean(errorParam);
+
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export default function ResetPasswordPage(): JSX.Element {
 
     setIsSubmitting(true);
 
-    try {
+      try {
       const { error: resetError } = await authClient.resetPassword({
         newPassword: password,
         token,
@@ -52,6 +54,7 @@ export default function ResetPasswordPage(): JSX.Element {
       }
 
       setIsDone(true);
+      await new Promise((resolve) => setTimeout(resolve, 1200));
       router.push(`/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -93,7 +96,8 @@ export default function ResetPasswordPage(): JSX.Element {
             ) : null}
           </CardHeader>
           <CardContent>
-            <form className="space-y-4" onSubmit={handleReset}>
+              {!isInvalid ? (
+                <form className="space-y-4" onSubmit={handleReset}>
               <div className="space-y-2">
                 <label className="text-sm text-slate-300" htmlFor="password">
                   New password
@@ -122,10 +126,15 @@ export default function ResetPasswordPage(): JSX.Element {
                   required
                 />
               </div>
-              <Button type="submit" disabled={isSubmitting || Boolean(errorParam)}>
-                {isSubmitting ? "Updating..." : "Update password"}
-              </Button>
-            </form>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Updating..." : "Update password"}
+                </Button>
+                </form>
+              ) : (
+                <div className="py-4">
+                  <p className="text-sm text-rose-200">Reset link is invalid or expired.</p>
+                </div>
+              )}
           </CardContent>
           <CardFooter className="text-sm text-slate-400">
             <Link
