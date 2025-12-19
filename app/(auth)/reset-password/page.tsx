@@ -79,11 +79,6 @@ export default function ResetPasswordPage(): JSX.Element {
         <Card>
           <CardHeader className="space-y-3">
             <h2 className="text-xl font-semibold">Reset password</h2>
-            {errorParam ? (
-              <p className="rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm text-rose-100">
-                Reset link is invalid or expired.
-              </p>
-            ) : null}
             {error ? (
               <p className="rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm text-rose-100">
                 {error}
