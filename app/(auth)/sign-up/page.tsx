@@ -48,9 +48,13 @@ export default function SignUpPage(): JSX.Element {
         return;
       }
 
-      // Respect provider-driven redirects: if the client returned a redirect we
-      // don't push client-side navigation here.
-      if (!data?.redirect) {
+      // Respect provider-driven redirects: some auth client responses include
+      // a `redirect` field, but not all variants expose it on the static type.
+      // Use a narrow type-guard to check for the presence of `redirect` safely.
+      const hasRedirect = (obj: unknown): obj is { redirect?: boolean } =>
+        Boolean(obj && typeof obj === "object" && "redirect" in (obj as any));
+
+      if (!hasRedirect(data) || !data.redirect) {
         router.push(callbackUrl);
       }
     } catch (err) {
