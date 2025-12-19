@@ -54,7 +54,7 @@ export default function SocialAuthButtons({
       <Button
         type="button"
         variant="secondary"
-        disabled={disabled}
+        disabled={disabled || !!activeProvider}
         onClick={() => handle("google")}
       >
         {activeProvider === "google" ? "Connecting..." : "Google"}
@@ -62,7 +62,7 @@ export default function SocialAuthButtons({
       <Button
         type="button"
         variant="secondary"
-        disabled={disabled}
+        disabled={disabled || !!activeProvider}
         onClick={() => handle("microsoft")}
       >
         {activeProvider === "microsoft" ? "Connecting..." : "Microsoft"}
@@ -70,7 +70,7 @@ export default function SocialAuthButtons({
       <Button
         type="button"
         variant="secondary"
-        disabled={disabled}
+        disabled={disabled || !!activeProvider}
         onClick={() => handle("discord")}
       >
         {activeProvider === "discord" ? "Connecting..." : "Discord"}
