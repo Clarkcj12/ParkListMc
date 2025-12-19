@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 export const publicServerSelect = {
   id: true,
@@ -35,5 +35,6 @@ export function toPublicServerResponse(
   server: PublicServer
 ): PublicServerResponse {
   const { _count, ...rest } = server;
-  return { ...rest, voteCount: _count.votes };
+  const voteCount = _count?.votes ?? 0;
+  return { ...rest, voteCount };
 }
