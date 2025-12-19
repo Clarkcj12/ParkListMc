@@ -9,15 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-
-function getCallbackUrl(searchParams: URLSearchParams): string {
-  const param =
-    searchParams.get("callbackUrl") ?? searchParams.get("callbackURL");
-  if (!param || !param.startsWith("/")) {
-    return "/dashboard";
-  }
-  return param;
-}
+import { getCallbackUrl } from "@/lib/callback-url";
 
 export default function SignUpPage(): JSX.Element {
   const router = useRouter();

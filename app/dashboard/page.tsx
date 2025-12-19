@@ -27,7 +27,7 @@ export default async function Dashboard(): Promise<JSX.Element> {
             Manage your park listings
           </h1>
           <p className="max-w-3xl text-lg text-slate-300">
-            Welcome back, {session.user.name}. Your listings, Votifier
+            Welcome back, {session?.user?.name ?? "there"}. Your listings, Votifier
             credentials, and vote reports will live here.
           </p>
           <div className="flex flex-wrap gap-3">
