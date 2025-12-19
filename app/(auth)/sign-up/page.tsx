@@ -63,30 +63,7 @@ export default function SignUpPage(): JSX.Element {
     }
   };
 
-  const handleSocialSignIn = async (provider: Provider) => {
-    setError(null);
-    setActiveProvider(provider);
-    setIsSubmitting(true);
-
-    try {
-      const { error: signInError } = await authClient.signIn.social({
-        provider,
-        callbackURL: callbackUrl,
-        requestSignUp: true,
-      });
-
-      if (signInError) {
-        setError(signInError.message || "Unable to continue.");
-      }
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Social sign-up failed:", err);
-      setError("Unable to continue.");
-    } finally {
-      setIsSubmitting(false);
-      setActiveProvider(null);
-    }
-  };
+  // Social sign-in/up is handled by `SocialAuthButtons` component.
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-16 text-slate-100">
