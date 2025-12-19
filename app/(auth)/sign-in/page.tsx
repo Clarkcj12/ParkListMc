@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import { getCallbackUrl } from "@/lib/callback-url";
+import { getCallbackUrl, isSafeCallbackUrl } from "@/lib/callback-url";
 import { redirectIsTrue } from "@/lib/auth-utils";
 import SocialAuthButtons from "@/components/auth/social-auth-buttons";
 
@@ -29,6 +29,10 @@ export default function SignInPage(): JSX.Element {
       router.replace(callbackUrl);
     }
   }, [callbackUrl, router, session]);
+
+  const forgotHref = isSafeCallbackUrl(callbackUrl) && callbackUrl !== "/dashboard"
+    ? `/forgot-password?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    : "/forgot-password";
 
   const handleEmailSignIn = async (event: FormEvent) => {
     event.preventDefault();
@@ -99,9 +103,17 @@ export default function SignInPage(): JSX.Element {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm text-slate-300" htmlFor="password">
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-slate-300" htmlFor="password">
+                    Password
+                  </label>
+                  <Link
+                    className="text-xs text-emerald-300 transition hover:text-emerald-200"
+                    href={forgotHref}
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <Input
                   id="password"
                   type="password"

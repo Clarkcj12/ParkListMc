@@ -11,3 +11,7 @@ export function getCallbackUrl(searchParams: SearchParamsLike): string {
   }
   return param;
 }
+
+export function isSafeCallbackUrl(value: string): boolean {
+  return Boolean(value && value.startsWith("/") && !value.startsWith("//"));
+}

@@ -10,9 +10,25 @@ const trustedOrigins = [
 ].filter(Boolean) as string[];
 
 const authSecret = process.env.BETTER_AUTH_SECRET;
+const allowEmailLog =
+  process.env.AUTH_EMAIL_LOG === "true" ||
+  process.env.NODE_ENV !== "production";
 
 if (!authSecret) {
   throw new Error("BETTER_AUTH_SECRET is required.");
+}
+
+function logAuthEmail(label: string, email: string, url: string): void {
+  if (!allowEmailLog) {
+    // In non-production or when email logging is disabled we should not throw
+    // to avoid breaking flows during development or test runs. Log a warning
+    // so operators can enable email logging if they expect these messages.
+    // eslint-disable-next-line no-console
+    console.warn(`[Auth] ${label} email not logged for ${email}: logging disabled`);
+    return;
+  }
+  // eslint-disable-next-line no-console
+  console.log(`[Auth] ${label} for ${email}: ${url}`);
 }
 
 export const auth = betterAuth({
@@ -25,6 +41,9 @@ export const auth = betterAuth({
   plugins: [nextCookies()],
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      logAuthEmail("Reset password", user.email, url);
+    },
   },
   socialProviders: {
     google: {
