@@ -9,9 +9,15 @@ const trustedOrigins = [
   process.env.BETTER_AUTH_URL,
 ].filter(Boolean) as string[];
 
+const authSecret = process.env.BETTER_AUTH_SECRET;
+
+if (!authSecret) {
+  throw new Error("BETTER_AUTH_SECRET is required.");
+}
+
 export const auth = betterAuth({
   appName: "ParkListMc",
-  secret: process.env.BETTER_AUTH_SECRET,
+  secret: authSecret,
   trustedOrigins,
   database: prismaAdapter(prisma, {
     provider: "mysql",

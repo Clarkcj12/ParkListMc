@@ -23,6 +23,7 @@ NuVotifier support, and ranked voting.
 
 - `DATABASE_URL` - MariaDB connection string.
 - `BETTER_AUTH_SECRET` - random secret used by Better Auth.
+- `IP_HASH_SALT` - salt/pepper for hashing voter IPs.
 - `BETTER_AUTH_URL` - base URL for auth callbacks.
 - `NEXT_PUBLIC_APP_URL` - app URL for client-side config.
 - Provider client IDs and secrets for Google, Discord, and Microsoft.

@@ -2,26 +2,26 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  publicServerSelect,
+  toPublicServerResponse,
+} from "@/lib/server-public";
 import { slugify } from "@/lib/slug";
 
 export const runtime = "nodejs";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 export async function GET(): Promise<Response> {
   const servers = await prisma.server.findMany({
     where: { status: "PUBLISHED" },
     orderBy: { createdAt: "desc" },
-    include: {
-      _count: {
-        select: { votes: true },
-      },
-    },
+    select: publicServerSelect,
   });
 
-  const payload = servers.map((server) => ({
-    ...server,
-    voteCount: server._count.votes,
-    _count: undefined,
-  }));
+  const payload = servers.map((server) => toPublicServerResponse(server));
 
   return NextResponse.json(payload);
 }
@@ -35,7 +35,19 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  let body: Record<string, unknown>;
+  try {
+    const parsed = await request.json();
+    if (!isRecord(parsed)) {
+      return NextResponse.json(
+        { error: "Invalid request body." },
+        { status: 400 }
+      );
+    }
+    body = parsed;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
 
   const name = typeof body.name === "string" ? body.name.trim() : "";
   const description =
@@ -100,7 +112,8 @@ export async function POST(request: Request): Promise<Response> {
           ? body.votifierPublicKey
           : null,
     },
+    select: publicServerSelect,
   });
 
-  return NextResponse.json(server, { status: 201 });
+  return NextResponse.json(toPublicServerResponse(server), { status: 201 });
 }

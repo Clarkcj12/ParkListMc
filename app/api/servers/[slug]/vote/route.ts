@@ -7,6 +7,11 @@ import { prisma } from "@/lib/prisma";
 export const runtime = "nodejs";
 
 const VOTE_WINDOW_MS = 12 * 60 * 60 * 1000;
+const IP_HASH_SALT = process.env.IP_HASH_SALT;
+
+if (!IP_HASH_SALT) {
+  throw new Error("IP_HASH_SALT is required to hash voter IPs.");
+}
 
 function getClientIp(headers: Headers): string | null {
   const forwarded = headers.get("x-forwarded-for");
@@ -18,15 +23,18 @@ function getClientIp(headers: Headers): string | null {
 }
 
 function hashIp(ip: string): string {
-  return createHash("sha256").update(ip).digest("hex");
+  return createHash("sha256")
+    .update(`${IP_HASH_SALT}:${ip}`)
+    .digest("hex");
 }
 
 export async function POST(
   request: Request,
   { params }: { params: { slug: string } }
 ): Promise<Response> {
-  const server = await prisma.server.findUnique({
-    where: { slug: params.slug },
+  const server = await prisma.server.findFirst({
+    where: { slug: params.slug, status: "PUBLISHED" },
+    select: { id: true },
   });
 
   if (!server) {
@@ -48,12 +56,18 @@ export async function POST(
   }
 
   const since = new Date(Date.now() - VOTE_WINDOW_MS);
+  const voterWhere =
+    userId && ipHash
+      ? { OR: [{ userId }, { ipHash }] }
+      : userId
+      ? { userId }
+      : { ipHash };
   const existingVote = await prisma.vote.findFirst({
     where: {
       serverId: server.id,
       source: "WEB",
       createdAt: { gte: since },
-      ...(userId ? { userId } : { ipHash }),
+      ...voterWhere,
     },
   });
 
