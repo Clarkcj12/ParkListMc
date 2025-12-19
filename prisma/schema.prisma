@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum ServerStatus {
+  DRAFT
+  PUBLISHED
+  SUSPENDED
+}
+
+enum VoteSource {
+  WEB
+  VOTIFIER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  servers  Server[]
+  votes    Vote[]
+
+  @@map("user")
+}
+
+model Account {
+  id                    String   @id @default(cuid())
+  providerId            String
+  accountId             String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Server {
+  id                 String       @id @default(cuid())
+  ownerId            String
+  name               String
+  slug               String       @unique
+  description        String
+  ipAddress          String
+  port               Int?
+  website            String?
+  discord            String?
+  version            String?
+  region             String?
+  theme              String?
+  status             ServerStatus @default(DRAFT)
+  tags               Json?
+  categories         Json?
+  bannerUrl          String?
+  votifierHost       String?
+  votifierPort       Int?
+  votifierPublicKey  String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  owner User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  votes Vote[]
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+model Vote {
+  id        String     @id @default(cuid())
+  serverId  String
+  userId    String?
+  ipHash    String?
+  userAgent String?
+  source    VoteSource @default(WEB)
+  createdAt DateTime   @default(now())
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([serverId])
+  @@index([userId])
+  @@index([ipHash])
+  @@index([createdAt])
+}
