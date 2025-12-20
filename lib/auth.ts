@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { nextCookies } from "better-auth/integrations/next-js";
+import argon2 from "argon2";
+// import { nextCookies } from "better-auth/integrations/next";
 
 import { prisma } from "@/lib/prisma";
 
@@ -38,11 +39,25 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "mysql",
   }),
-  plugins: [nextCookies()],
+  plugins: [],
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
       logAuthEmail("Reset password", user.email, url);
+    },
+    password: {
+      hash: async (plain: string): Promise<string> => {
+        // Use argon2id for hashing passwords
+        return argon2.hash(plain, { type: argon2.argon2id });
+      },
+      verify: async (hash: string, plain: string): Promise<boolean> => {
+        try {
+          return await argon2.verify(hash, plain);
+        } catch (err) {
+          // On error treat as verification failure
+          return false;
+        }
+      },
     },
   },
   socialProviders: {
